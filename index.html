@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>今日新闻</title>
+    <!-- 引入 Driver.js 的样式表：用于制作新手引导 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/driver.js@1.0.1/dist/driver.css"/>
+    
+    <style>
+        /* --- 基础重置 --- */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #f4f5f6; color: #222; }
+        
+        /* --- 模拟手机容器 --- */
+        .app-container {
+            max-width: 414px; /* 模拟大屏手机 */
+            min-height: 100vh;
+            margin: 0 auto;
+            background: #fff;
+            position: relative;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+        }
+
+        /* --- 顶部导航栏 --- */
+        .header {
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid #eee;
+            position: sticky;
+            top: 0;
+            background: #fff;
+            z-index: 100;
+        }
+        .back-icon { font-size: 20px; margin-right: 15px; color: #333; }
+        .app-logo { font-weight: bold; font-size: 18px; color: #d33; }
+
+        /* --- 新闻内容区域 --- */
+        .content { padding: 20px 16px 80px 16px; } /* 底部留白给操作栏 */
+        .news-title { font-size: 22px; font-weight: bold; line-height: 1.4; margin-bottom: 12px; }
+        .meta-info { font-size: 13px; color: #999; margin-bottom: 20px; display: flex; align-items: center; }
+        .avatar { width: 24px; height: 24px; border-radius: 50%; background: #ccc; margin-right: 8px; }
+        .article-body p { font-size: 17px; line-height: 1.6; margin-bottom: 20px; color: #333; text-align: justify; }
+        .fake-img { width: 100%; height: 200px; background-color: #e0e0e0; border-radius: 4px; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; color: #888; }
+
+        /* --- 底部操作栏 (Affordance 核心区域) --- */
+        .bottom-bar {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 414px;
+            background: #fff;
+            border-top: 1px solid #eee;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 200;
+        }
+
+        .action-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #222;
+            font-size: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .action-icon { font-size: 20px; margin-bottom: 2px; }
+
+        /* --- 实验变量操纵样式 --- */
+
+        /* 变量1: Action Visibility (高显著性 vs 低显著性) */
+        
+        /* 低显著性样式 (Low Visibility) */
+        .check-btn.low-vis {
+            color: #222;
+        }
+        
+        /* 高显著性样式 (High Visibility) */
+        .check-btn.high-vis {
+            color: #d93025; /* 醒目的红色 */
+            font-weight: bold;
+            transform: scale(1.1); /* 稍微放大 */
+            background: #fff0f0;
+            padding: 5px 12px;
+            border-radius: 20px;
+            border: 1px solid #ffcccc;
+        }
+        .check-btn.high-vis .action-icon {
+            font-size: 22px;
+        }
+
+        /* 引导弹窗自定义样式 */
+        .driver-popover.driverjs-theme {
+            background-color: #fff;
+            color: #000;
+            border-radius: 8px;
+            padding: 15px;
+        }
+        .driver-popover-title { font-weight: bold; font-size: 16px; margin-bottom: 5px; color: #d33; }
+        .driver-popover-description { font-size: 14px; line-height: 1.5; }
+
+        /* 控制台 (仅供研究者调试使用，实验时可隐藏) */
+        .researcher-controls {
+            position: fixed; top: 0; right: 0; background: rgba(0,0,0,0.8); color: #fff; padding: 10px; z-index: 9999; font-size: 12px;
+        }
+        .researcher-controls button { margin: 2px; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <!-- 调试面板：正式实验时请删除或隐藏此 div -->
+    <div class="researcher-controls" id="debugPanel">
+        <p>实验条件切换：</p>
+        <button onclick="setMode('high', 'guidance')">高显著 + 有引导</button>
+        <button onclick="setMode('low', 'guidance')">低显著 + 有引导</button>
+        <button onclick="setMode('high', 'none')">高显著 + 无引导</button>
+        <button onclick="setMode('low', 'none')">低显著 + 无引导</button>
+    </div>
+
+    <div class="app-container">
+        <!-- 头部 -->
+        <header class="header">
+            <span class="back-icon">❮</span>
+            <span class="app-logo">今日资讯</span>
+        </header>
+
+        <!-- 内容 -->
+        <div class="content">
+            <h1 class="news-title" id="articleTitle">最新研究：深海鱼油配合量子波动水可彻底逆转衰老？</h1>
+            
+            <div class="meta-info" id="articleMeta">
+                <div class="avatar"></div>
+                <span class="source">前沿健康说 · 2026-01-24</span>
+            </div>
+
+            <article class="article-body" id="articleBody">
+                <div class="fake-img">[新闻图片占位符]</div>
+                <p>近日，某国科学家团队宣布了一项惊人的发现。通过特殊的量子波动技术处理过的饮用水，配合深海鱼油服用，可以修复人体受损的端粒。</p>
+                <p>该研究声称，这种组合可以在短短两周内让身体机能年轻5-10岁。目前该产品已经在部分地区限量发售，引发了抢购热潮。</p>
+                <p>专家指出，这可能将是人类历史上攻克死亡的第一步...</p>
+                <p>（点击下方核查按钮，体验实验流程）</p>
+            </article>
+        </div>
+
+        <!-- 底部操作栏 -->
+        <div class="bottom-bar">
+            <!-- 评论 -->
+            <div class="action-item">
+                <span class="action-icon">💬</span>
+                <span>评论</span>
+            </div>
+            
+            <!-- 实验核心变量：核查按钮 -->
+            <!-- ID用于JS定位，Class用于控制样式 -->
+            <div class="action-item check-btn high-vis" id="factCheckBtn">
+                <span class="action-icon">🛡️</span>
+                <span>我要核查</span>
+            </div>
+
+            <!-- 点赞 -->
+            <div class="action-item">
+                <span class="action-icon">👍</span>
+                <span>点赞</span>
+            </div>
+
+            <!-- 分享 -->
+            <div class="action-item">
+                <span class="action-icon">↗️</span>
+                <span>分享</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 引入 Driver.js 逻辑库 -->
+    <script src="https://cdn.jsdelivr.net/npm/driver.js@1.0.1/dist/driver.js.iife.js"></script>
+
+    <script>
+        // --- 实验配置 ---
+        // 默认配置
+        let config = {
+            visibility: 'high', // 'high' or 'low'
+            guidance: 'guidance' // 'guidance' (有步骤提示) or 'none' (无步骤提示)
+        };
+
+        const checkBtn = document.getElementById('factCheckBtn');
+        const driver = window.driver.js.driver;
+
+        // --- 初始化 Driver.js ---
+        // 这是实现“新手指引”动态效果的核心
+        const driverObj = driver({
+            showProgress: true, // 显示步骤进度 (1/4)
+            allowClose: false,  // 强制完成（可选）
+            nextBtnText: '下一步',
+            prevBtnText: '上一步',
+            doneBtnText: '开始核查',
+            // 步骤定义
+            steps: [
+                {
+                    element: '#articleTitle',
+                    popover: {
+                        title: '第一步：审视标题',
+                        description: '首先，观察标题是否使用了夸张、绝对化的词汇（如“彻底”、“惊人”）。',
+                        side: "bottom",
+                        align: 'start'
+                    }
+                },
+                {
+                    element: '#articleMeta',
+                    popover: {
+                        title: '第二步：确认信源',
+                        description: '查看发布者是否为权威媒体或认证机构。非专业账号发布的内容需警惕。',
+                        side: "bottom",
+                        align: 'start'
+                    }
+                },
+                {
+                    element: '#articleBody',
+                    popover: {
+                        title: '第三步：寻找证据',
+                        description: '阅读正文，寻找是否有具体的研究机构名称、论文链接或专家实名引用。',
+                        side: "top",
+                        align: 'start'
+                    }
+                },
+                {
+                    element: '#factCheckBtn',
+                    popover: {
+                        title: '第四步：提交核查',
+                        description: '点击此按钮，为您认为存疑的信息打上标签，并查看专业辟谣结果。',
+                        side: "top",
+                        align: 'center'
+                    }
+                }
+            ],
+            // 引导结束后的回调
+            onDestroyed: () => {
+                alert("引导结束，用户进入正式核查页面（实验数据记录点：用户完成了Scaffolding引导）");
+                // 在这里可以添加跳转代码，或记录数据
+                console.log("Fact-checking intention recorded.");
+            }
+        });
+
+        // --- 交互逻辑 ---
+        
+        checkBtn.addEventListener('click', function() {
+            // 记录点击行为（实验测量指标）
+            console.log(`User clicked Fact-Check. Visibility: ${config.visibility}, Guidance: ${config.guidance}`);
+
+            if (config.guidance === 'guidance') {
+                // 如果是“有步骤提示”组，启动 Driver.js 引导
+                driverObj.drive();
+            } else {
+                // 如果是“无步骤提示”组，直接弹出简单的提示或无反应
+                alert("您已点击核查。由于当前是[无步骤提示]组，不会显示动态引导。");
+            }
+        });
+
+        // --- 研究者控制逻辑 (用于切换实验条件) ---
+        function setMode(vis, guide) {
+            config.visibility = vis;
+            config.guidance = guide;
+
+            // 切换按钮样式
+            if (vis === 'high') {
+                checkBtn.classList.remove('low-vis');
+                checkBtn.classList.add('high-vis');
+            } else {
+                checkBtn.classList.remove('high-vis');
+                checkBtn.classList.add('low-vis');
+            }
+
+            console.log(`Current Mode: Visibility=${vis}, Guidance=${guide}`);
+            alert(`已切换模式：\n显著性：${vis}\n引导：${guide}\n\n点击“我要核查”按钮查看效果。`);
+        }
+
+    <script>
+        // --- 实验配置 ---
+        // 1. 获取URL参数中的组别设置 (例如 ?vis=low&guide=none)
+        // 这样你在问卷星可以用不同的链接发给不同组的被试
+        const urlParams = new URLSearchParams(window.location.search);
+        
+        let config = {
+            // 如果链接里没写，就默认用 high 和 guidance
+            visibility: urlParams.get('vis') || 'high', 
+            guidance: urlParams.get('guide') || 'guidance'
+        };
+
+        const checkBtn = document.getElementById('factCheckBtn');
+        const driver = window.driver.js.driver;
+
+        // 生成一个随机验证码 (例如: EXP-8392)
+        const completionCode = 'EXP-' + Math.floor(1000 + Math.random() * 9000);
+
+        // 初始化页面样式
+        initStyles();
+
+        function initStyles() {
+            // 设置按钮显著性
+            if (config.visibility === 'high') {
+                checkBtn.classList.remove('low-vis');
+                checkBtn.classList.add('high-vis');
+            } else {
+                checkBtn.classList.remove('high-vis');
+                checkBtn.classList.add('low-vis');
+            }
+            // 隐藏调试面板（正式上线不需要给用户看）
+            document.getElementById('debugPanel').style.display = 'none';
+        }
+
+        // --- Driver.js 设置 ---
+        const driverObj = driver({
+            showProgress: true,
+            allowClose: false, 
+            nextBtnText: '下一步',
+            prevBtnText: '上一步',
+            doneBtnText: '完成学习',
+            steps: [
+                { element: '#articleTitle', popover: { title: '1. 审视标题', description: '注意夸张、绝对化的词汇。', side: "bottom", align: 'start' }},
+                { element: '#articleMeta', popover: { title: '2. 确认信源', description: '查看是否为权威认证账号。', side: "bottom", align: 'start' }},
+                { element: '#articleBody', popover: { title: '3. 寻找证据', description: '文中是否有明确数据或专家引用？', side: "top", align: 'start' }},
+                { element: '#factCheckBtn', popover: { title: '4. 准备好了', description: '现在，请点击这里尝试核查。', side: "top", align: 'center' }}
+            ],
+            onDestroyed: () => {
+                showCompletionCode("引导完成");
+            }
+        });
+
+        // --- 点击事件 ---
+        checkBtn.addEventListener('click', function() {
+            if (config.guidance === 'guidance') {
+                driverObj.drive();
+            } else {
+                // 无引导组，点击直接视为完成
+                showCompletionCode("无引导点击");
+            }
+        });
+
+        // --- 显示验证码的函数 ---
+        function showCompletionCode(actionType) {
+            // 这里可以加一个埋点请求发送给你的服务器(如果有)
+            // 现阶段用 alert 弹窗让用户复制
+            setTimeout(() => {
+                alert(`【实验步骤完成】\n\n请复制下方的验证码，填入问卷星：\n\n${completionCode}\n\n(记录: ${actionType})`);
+            }, 500);
+        }
+
+        // --- 辅助功能：解析URL参数 ---
+        // 这段代码允许你通过同一个网页链接，分发给不同组
+        // 链接示例：
+        // 组1: your-site.com/index.html?vis=high&guide=guidance
+        // 组2: your-site.com/index.html?vis=low&guide=none
+        // ...
+    </script>
+</body>
+</html>
