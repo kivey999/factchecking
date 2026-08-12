@@ -383,7 +383,7 @@ body{padding:4px 4px 8px!important}
 .note-status{display:none;margin-left:6px;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:800;line-height:1.35;white-space:nowrap}.note-status.show{display:inline-block}.note-status.priority{background:#e5f8ed;color:#16834d}.note-status.lowered{background:#fff0f0;color:#c73737}.note-status.pending{background:#f1f3f5;color:#69727c}
 .note-user-avatar{width:24px;height:24px;flex:0 0 24px;border-radius:50%;background:#fff0f0;border:1px solid #f3caca;color:#c62828;display:flex;align-items:center;justify-content:center;font-size:0;margin-left:-7px}
 .note-user-avatar svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.note-text{font-size:14px;line-height:1.55;color:#333;background:#fff;border:1px solid #f2e0e0;border-radius:9px;padding:9px 10px;margin-bottom:9px}
+.note-text{font-size:14px;line-height:1.55;color:#333;background:#fff;border:1px solid #f2e0e0;border-radius:9px;padding:9px 6px;margin-bottom:9px}
 .note-link{display:inline;color:inherit;white-space:nowrap}
 .note-question{font-size:13px;font-weight:700;color:#555;margin-bottom:8px}
 .note-feedback{display:none!important}
@@ -593,7 +593,7 @@ body{padding:4px 4px 8px!important}
             </article>
             <div class="community-note-module" id="noteRatingModule">
               <div class="note-user"><span class="note-user-avatar" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"/><circle cx="9.5" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span><span class="note-user-main">用户小张 添加了一条笔记</span><span class="note-user-time">· 2分钟前</span></div>
-              <div class="note-text">判断量子赋能种子是否能够稳定增产，通常需要查看独立田间试验数据、处理方法说明和可重复的检测结果。参见：<span class="note-link">https://newsinfo.com/seed8.</span><span class="note-status" id="noteStatus"><span></span></span></div>
+              <div class="note-text">判断量子赋能种子是否能够稳定增产，通常需要查看独立田间试验数据、处理方法说明和可重复的检测结果。<span class="note-status" id="noteStatus"><span></span></span></div>
               <div class="rating-nudge" id="ratingNudge" aria-hidden="true">请评价这条笔记</div>
               <div class="note-question">这条笔记有帮助吗？</div>
               <div class="note-actions">
@@ -750,7 +750,7 @@ body{padding:4px 4px 8px!important}
 const SUBMIT_TITLE='提交成功';const SUBMIT_DESC='您的核查笔记已进入平台审核。';
 let telemetry={A:0,B:0,C:0,D:0,E:0,F:0,G:0,H:0,I:0,J:0,K:0,L:0,M:0,N:0,O:0,start:Date.now()};let codeShown=false;let canGetCode=false;let practiceComplete=false;let formalExperimentStarted=false;let codeTimerStarted=false;
 const phoneWrapper=document.getElementById('phoneWrapper');const codeBtn=document.getElementById('exitCodeBtn');const newsScrollEl=document.getElementById('newsScroll');let coachScrollTop=0;
-function setFormalExperimentContent(){document.getElementById('articleTitle').innerText='5G基站比4G基站辐射更强，危害更大';document.getElementById('articleBody').innerHTML='<p>随着 5G 网络的普及，生活中的通信基站越来越常见。通信行业资料显示，相比 4G，5G 以及未来 6G 通信使用更高频段信号，以达到更高的传输效率，并通过更密集的基站部署提升网络覆盖。这导致日常生活环境中的电磁辐射源增多，整体辐射强度高于过去。有居民担心，长期近距离暴露在多个基站形成的电磁环境中可能不利于人体健康。因此，在人员密集区域建设 5G 基站与规划未来 6G 设施时应谨慎。</p>';document.querySelector('#noteRatingModule .note-user-main').innerText='用户momojr 添加了一条笔记';document.querySelector('#noteRatingModule .note-text').innerHTML='判断5G基站是否存在辐射风险，通常需要结合电磁辐射检测值、暴露距离和国家标准限值。参见：<span class="note-link">https://newsinfo.com/gb8.</span><span class="note-status" id="noteStatus"><span></span></span>';bindCurrentExistingAnnotation('用户小王','我觉得这里需要更多信息才能判断。');document.getElementById('exitText').classList.remove('intro-tip');document.getElementById('exitText').innerHTML='<span class="tip-line">浏览结束后，点击右侧红色</span><span class="tip-line">按钮获取验证码并填入问卷。</span>';codeBtn.style.display='';if(newsScrollEl)newsScrollEl.scrollTop=0}
+function setFormalExperimentContent(){document.getElementById('articleTitle').innerText='5G基站比4G基站辐射更强，危害更大';document.getElementById('articleBody').innerHTML='<p>随着 5G 网络的普及，生活中的通信基站越来越常见。通信行业资料显示，相比 4G，5G 以及未来 6G 通信使用更高频段信号，以达到更高的传输效率，并通过更密集的基站部署提升网络覆盖。这导致日常生活环境中的电磁辐射源增多，整体辐射强度高于过去。有居民担心，长期近距离暴露在多个基站形成的电磁环境中可能不利于人体健康。因此，在人员密集区域建设 5G 基站与规划未来 6G 设施时应谨慎。</p>';document.querySelector('#noteRatingModule .note-user-main').innerText='用户momojr 添加了一条笔记';document.querySelector('#noteRatingModule .note-text').innerHTML='判断5G基站是否存在辐射风险，通常需要结合电磁辐射检测值、暴露距离和国家标准限值。但不同小区情况不同，仍需实测数据支持。<span class="note-status" id="noteStatus"><span></span></span>';bindCurrentExistingAnnotation('用户小王','我觉得这里需要更多信息才能判断。');document.getElementById('exitText').classList.remove('intro-tip');document.getElementById('exitText').innerHTML='<span class="tip-line">浏览结束后，点击右侧红色</span><span class="tip-line">按钮获取验证码并填入问卷。</span>';codeBtn.style.display='';if(newsScrollEl)newsScrollEl.scrollTop=0}
 function recordFirstAction(code){if(formalExperimentStarted&&!telemetry.O)telemetry.O=code}
 function lockCoachScroll(){phoneWrapper.classList.add('coach-locked')}
 function unlockCoachScroll(){phoneWrapper.classList.remove('coach-locked')}
@@ -827,6 +827,8 @@ window.addEventListener('load',()=>setTimeout(()=>{const baseTutorialShowFinish=
 </script>
 </body>
 </html>
+
+
 
 
 
